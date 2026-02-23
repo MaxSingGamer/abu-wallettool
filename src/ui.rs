@@ -7,24 +7,28 @@ use std::path::PathBuf;
 
 /// 显示欢迎信息
 pub fn welcome() {
-    println!();
-    println!("{}", style("╔══════════════════════════════════════════╗").cyan());
-    println!("{}", style("║        ABU 钱包工具 v0.1.0              ║").cyan());
-    println!("{}", style("║        阿尔法银行联盟 - 个人账本          ║").cyan());
-    println!("{}", style("╚══════════════════════════════════════════╝").cyan());
-    println!();
-}
+        println!();
+        println!("{}", style("╔══════════════════════════════════════════╗").cyan());
+        println!("{}", style("║           ABU - Alpha Bank Union         ║").cyan());
+        println!("{}", style("║            Alpha Coin钱包工具            ║").cyan());
+        println!("{}", style("║   ©2026 Max Shin - All Rights Reserved.  ║").cyan());
+        println!("{}", style("╚══════════════════════════════════════════╝").cyan());
+        println!();
+        println!("欢迎使用 Alpha Bank Union Alpha Coin钱包工具");
+        println!("此工具用于管理您的Alpha Coin钱包");
+        println!();
+    }
 
 /// 主菜单
 pub fn main_menu() -> usize {
     let items = vec![
-        "1. 生成并发送交易 (打包为ZIP)",
-        "2. 导入并验证交易 (解压ZIP)",
-        "3. 导出反假币证据 (JSON)",
-        "4. 导入ABU黑名单",
-        "5. 查看交易简图",
-        "6. 清理缓存 (保留数据库)",
-        "0. 退出",
+        "生成并导出交易 (导出ZIP)",
+        "导入并验证交易 (导入ZIP)",
+        "导出反假币证据 (导出JSON)",
+        "导入ABU交易黑名单 (导入JSON)",
+        "查看交易简图",
+        "清理缓存 (保留钱包数据库)",
+        "退出",
     ];
     Select::with_theme(&ColorfulTheme::default())
         .with_prompt("请选择操作")
