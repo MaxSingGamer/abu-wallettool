@@ -7,13 +7,16 @@ use std::path::Path;
 
 #[derive(Debug, Deserialize)]
 pub struct BlacklistEntry {
-    pub address: String,   // "游戏ID <邮箱>" 或 公钥哈希
+    pub address: String,
+    #[allow(dead_code)]
     pub reason: String,
+    #[allow(dead_code)]
     pub timestamp: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Blacklist {
+    #[allow(dead_code)]
     pub version: String,
     pub entries: Vec<BlacklistEntry>,
 }

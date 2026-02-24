@@ -8,7 +8,7 @@ mod blacklist;
 mod config;
 mod ui;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Result};
 use chrono::Local;
 use simple_home_dir::home_dir;
 use std::fs;
@@ -126,28 +126,6 @@ impl App {
         Ok(())
     }
 
-    /// 获取对方公钥（从本地信任目录或让用户选择）
-    fn get_peer_pubkey(&self, peer_id: &str) -> Result<Vec<u8>> {
-        // 先尝试从 trusted_pubkeys_dir 中查找匹配的文件名（包含 peer_id 的 .asc）
-        if let Ok(entries) = fs::read_dir(&self.trusted_pubkeys_dir) {
-            for entry in entries.flatten() {
-                let path = entry.path();
-                if path.extension().and_then(|e| e.to_str()) == Some("asc") {
-                    if let Some(name) = path.file_stem().and_then(|n| n.to_str()) {
-                        if name.contains(peer_id) {
-                            return fs::read(&path).context("读取公钥失败");
-                        }
-                    }
-                }
-            }
-        }
-        // 否则让用户选择
-        let filters = [("公钥文件", &["asc"][..])];
-        let path = ui::choose_open_file(&format!("选择 {} 的公钥", peer_id), &filters)
-            .ok_or_else(|| anyhow!("未选择公钥"))?;
-        fs::read(&path).context("读取公钥失败")
-    }
-
     /// 生成并发送交易
     fn send_transaction(&mut self) -> Result<()> {
         self.ensure_keys()?;
@@ -191,7 +169,7 @@ impl App {
 
         let default_zip = format!("{}.zip", tx_id);
         let filters = [("ZIP 文件", &["zip"][..])];
-        let save_path = ui::choose_save_file("保存交易包", &default_zip, &filters)
+        let save_path = ui::choose_save_file("保存交易包，请发送给收款方", &default_zip, &filters)
             .ok_or_else(|| anyhow!("未选择保存位置"))?;
 
         zip_util::create_transaction_zip(&tx_json, pubkey_bytes, &pubkey_filename, &save_path)?;
@@ -201,6 +179,63 @@ impl App {
         db::insert_transaction(&conn, &tx)?;
 
         ui::message_info("成功", &format!("交易包已保存至 {:?}\n请将此文件发送给收款方。", save_path));
+
+        // 等待导入回执
+        loop {
+            if !ui::confirm("已发送交易包，现在导入收款方的回执吗？") {
+                ui::message_info("提示", "您稍后可以通过再次选择“生成并发送交易”并导入回执来完成交易。");
+                break;
+            }
+
+            let filters = [("回执ZIP文件", &["zip"][..])];
+            let receipt_path = ui::choose_open_file("选择收款方发回的回执ZIP", &filters)
+                .ok_or_else(|| anyhow!("未选择回执文件"))?;
+
+            // 解压回执ZIP，获取交易JSON和公钥
+            let (receipt_json, pubkey_bytes, _filename) = zip_util::extract_transaction_zip(&receipt_path)?;
+            let receipt_tx: transaction::Transaction = serde_json::from_str(&receipt_json)?;
+
+            // 验证交易ID是否匹配
+            if receipt_tx.id != tx.id {
+                ui::message_error("错误", "回执中的交易ID不匹配，请检查文件");
+                continue;
+            }
+
+            // 验证收款方签名是否存在
+            let to_sig = match &receipt_tx.to_signature {
+                Some(s) => s,
+                None => {
+                    ui::message_error("错误", "回执中缺少收款方签名");
+                    continue;
+                }
+            };
+
+            // 从公钥字节提取Ed25519公钥
+            let peer_pubkey = match extract_ed25519_pubkey_from_asc(&pubkey_bytes) {
+                Ok(pk) => pk,
+                Err(e) => {
+                    ui::message_error("错误", &format!("解析公钥失败: {}", e));
+                    continue;
+                }
+            };
+
+            // 验证收款方签名
+            let ack_msg = format!("ACK:{}", tx.id);
+            if !crypto::verify_signature(&peer_pubkey, ack_msg.as_bytes(), &STANDARD.decode(to_sig)?) {
+                ui::message_error("错误", "收款方签名验证失败");
+                continue;
+            }
+
+            // 更新本地交易状态
+            let conn = db::init_db(&self.db_path)?;
+            let mut updated_tx = receipt_tx.clone();
+            updated_tx.status = "completed".to_string();
+            db::insert_transaction(&conn, &updated_tx)?;
+
+            ui::message_info("成功", "回执验证通过，交易已完成");
+            break;
+        }
+
         Ok(())
     }
 
@@ -226,11 +261,12 @@ impl App {
         }
 
         // 验证对方签名（付款方）
-        // 需要从对方公钥中解析出公钥字节
-        // 这里简化：用 sequoia 从公钥文件提取 Ed25519 公钥字节（需要实现）
-        // 假设有一个函数 extract_ed25519_pubkey_from_asc
         let peer_pubkey_bytes = extract_ed25519_pubkey_from_asc(&peer_pubkey_bytes)?;
-        if !crypto::verify_signature(&peer_pubkey_bytes, format!("{}:{}", tx.id, tx.amount).as_bytes(), &STANDARD.decode(&tx.from_signature)?) {
+        if !crypto::verify_signature(
+            &peer_pubkey_bytes,
+            format!("{}:{}", tx.id, tx.amount).as_bytes(),
+            &STANDARD.decode(&tx.from_signature)?,
+        ) {
             return Err(anyhow!("付款方签名验证失败"));
         }
 
@@ -243,10 +279,6 @@ impl App {
                 }
             }
         }
-
-        // 检查余额是否足够（需要查询对方账本？这里我们只能信任对方，但可做本地检查）
-        // 因为是本地账本，我们没有对方余额，只能依赖后续ABU仲裁。此处仅提醒。
-        ui::message_info("提醒", "本地无法验证对方余额，请自行判断风险。");
 
         // 生成收款方签名（确认）
         let ack_msg = format!("ACK:{}", tx.id);
@@ -262,6 +294,21 @@ impl App {
         db::insert_transaction(&conn, &confirmed_tx)?;
 
         ui::message_info("成功", "交易已接收并写入账本");
+
+        // 生成回执包并提示保存
+        let receipt_json = serde_json::to_string_pretty(&confirmed_tx)?;
+        let my_pubkey_bytes = self.my_pubkey_bytes.as_ref()
+            .ok_or_else(|| anyhow!("未加载公钥"))?;
+        let my_pubkey_filename = format!("{}_recipient.asc", self.my_identity.as_ref().unwrap().0);
+
+        let default_receipt_name = format!("receipt_{}.zip", confirmed_tx.id);
+        let filters = [("ZIP 文件", &["zip"][..])];
+        let save_path = ui::choose_save_file("保存回执包，请发送给付款方", &default_receipt_name, &filters)
+            .ok_or_else(|| anyhow!("未选择保存位置"))?;
+
+        zip_util::create_transaction_zip(&receipt_json, my_pubkey_bytes, &my_pubkey_filename, &save_path)?;
+        ui::message_info("成功", &format!("回执包已保存至 {:?}\n请将此文件发送给付款方。", save_path));
+
         Ok(())
     }
 
