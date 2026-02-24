@@ -8,15 +8,15 @@ use std::path::Path;
 #[derive(Debug, Deserialize)]
 pub struct BlacklistEntry {
     pub address: String,
-    #[allow(dead_code)]
+    
     pub reason: String,
-    #[allow(dead_code)]
+    
     pub timestamp: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Blacklist {
-    #[allow(dead_code)]
+    
     pub version: String,
     pub entries: Vec<BlacklistEntry>,
 }
