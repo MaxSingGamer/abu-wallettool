@@ -6,17 +6,16 @@ use std::fs;
 use std::path::Path;
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct BlacklistEntry {
     pub address: String,
-    
     pub reason: String,
-    
     pub timestamp: String,
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct Blacklist {
-    
     pub version: String,
     pub entries: Vec<BlacklistEntry>,
 }
