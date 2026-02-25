@@ -12,7 +12,7 @@ use anyhow::{anyhow, Result};
 use chrono::Local;
 use simple_home_dir::home_dir;
 use std::fs;
-use std::path::PathBuf;  // 去掉 Path
+use std::path::PathBuf;
 use sequoia_openpgp as openpgp;
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
