@@ -11,7 +11,7 @@ authors = ["Max Shin <xhzmax@outlook.com>"]
 sequoia-openpgp = { version = "2.2.0", default-features = false, features = ["crypto-cng"] }          # 解析 OpenPGP 公钥
 ring = "0.17"                     # 签名、随机数
 sha3 = "0.10"                     # SHA3-256
-base64 = "0.21"                   # Base64 编码/解码
+base64 = "0.22.1"                   # Base64 编码/解码
 zeroize = { version = "1.7", features = ["zeroize_derive"] }  # 内存清零
 aes-gcm = "0.10"                  # AES-GCM 解密（私钥）
 pbkdf2 = "0.12"                   # PBKDF2 密钥派生
@@ -19,22 +19,22 @@ hmac = "0.12"
 sha2 = "0.10"
 
 # 数据库
-rusqlite = { version = "0.29", features = ["bundled"] }
+rusqlite = { version = "0.38.0", features = ["bundled"] }
 
 # ZIP 处理
 zip = "8.1.0"
 
 # 用户界面
-dialoguer = "0.11"
-console = "0.15"
+dialoguer = "0.12.0"
+console = "0.16.2"
 native-dialog = "0.7.0"             # 系统文件对话框
 
 # 配置
-simple-home-dir = "0.2"           # 获取用户目录
+simple-home-dir = "0.5.2"           # 获取用户目录
 
 # 工具
 chrono = "0.4"                    # 时间处理
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 anyhow = "1.0"
-thiserror = "1.0"
+thiserror = "2.0.18"
