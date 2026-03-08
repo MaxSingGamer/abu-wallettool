@@ -1,4 +1,4 @@
-//! 密钥处理：解密私钥、解析公钥、签名、哈希
+ 密钥处理：解密私钥、解析公钥、签名、哈希
 
 use anyhow::{anyhow, Result};  // 删除 Context
 use ring::signature::{self, Ed25519KeyPair};  // 只保留需要的

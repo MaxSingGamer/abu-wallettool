@@ -1,4 +1,4 @@
-//! 交易数据结构及序列化
+ 交易数据结构及序列化
 
 use serde::{Deserialize, Serialize};
 use crate::crypto::sha3_256_base64;

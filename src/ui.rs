@@ -1,5 +1,3 @@
-//! 菜单、对话框、文件选择
-
 use console::style;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password, Select};
 use native_dialog::{FileDialog, MessageDialog, MessageType};
@@ -10,7 +8,7 @@ pub fn welcome() {
         println!();
         println!("{}", style("╔══════════════════════════════════════════╗").cyan());
         println!("{}", style("║           ABU - Alpha Bank Union         ║").cyan());
-        println!("{}", style("║            Alpha Coin钱包工具            ║").cyan());
+        println!("{}", style("║            Alpha Coin 钱包工具           ║").cyan());
         println!("{}", style("║   ©2026 Max Shin - All Rights Reserved.  ║").cyan());
         println!("{}", style("╚══════════════════════════════════════════╝").cyan());
         println!();

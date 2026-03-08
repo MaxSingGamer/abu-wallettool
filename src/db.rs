@@ -1,4 +1,4 @@
-//! 个人账本 SQLite 数据库
+ 个人账本 SQLite 数据库
 
 use rusqlite::{params, Connection};  // 去掉 SqlResult
 use anyhow::Result;  // 去掉 anyhow

@@ -1,5 +1,3 @@
-//! ABU 钱包工具主入口
-
 mod crypto;
 mod db;
 mod transaction;
@@ -410,7 +408,7 @@ fn extract_ed25519_pubkey_from_asc(asc_data: &[u8]) -> Result<Vec<u8>> {
                         return Ok(bytes.to_vec());
                     }
                 }
-                _ => continue, // 理论上不会发生，因为算法已匹配
+                _ => continue,
             }
         }
     }
