@@ -12,7 +12,7 @@ pub fn welcome() {
         println!("{}", style("║   ©2026 Max Shin - All Rights Reserved.  ║").cyan());
         println!("{}", style("╚══════════════════════════════════════════╝").cyan());
         println!();
-        println!("欢迎使用 Alpha Bank Union Alpha Coin钱包工具");
+        println!("欢迎使用 Alpha Bank Union Alpha Coin 钱包工具");
         println!("此工具用于管理您的Alpha Coin钱包");
         println!();
     }

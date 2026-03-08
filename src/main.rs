@@ -377,7 +377,7 @@ impl App {
         }
         // 删除配置文件
         let home = home_dir().unwrap();
-        let config_path = home.join(".abu/last_settings.ini");
+        let config_path = home.join(".abu/last_settings.json");
         if config_path.exists() {
             fs::remove_file(config_path)?;
         }

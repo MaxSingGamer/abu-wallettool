@@ -1,20 +1,20 @@
 [package]
 name = "abu-wallettool"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 description = "Alpha Bank Union (ABU) Wallet Tool for Alpha Coin"
 license = "MIT"
-authors = ["Max Shin <xhzmax@outlook.com>"]
+authors = ["Max Shin"]
 
 [dependencies]
 # 密码学
-sequoia-openpgp = { version = "2.2.0", default-features = false, features = ["crypto-cng"] }          # 解析 OpenPGP 公钥
-ring = "0.17"                     # 签名、随机数
-sha3 = "0.10"                     # SHA3-256
-base64 = "0.22.1"                   # Base64 编码/解码
-zeroize = { version = "1.7", features = ["zeroize_derive"] }  # 内存清零
-aes-gcm = "0.10"                  # AES-GCM 解密（私钥）
-pbkdf2 = "0.12"                   # PBKDF2 密钥派生
+sequoia-openpgp = { version = "2.2.0", default-features = false, features = ["crypto-cng"] }
+ring = "0.17"
+sha3 = "0.10"
+base64 = "0.22.1"
+zeroize = { version = "1.7", features = ["zeroize_derive"] }
+aes-gcm = "0.10"
+pbkdf2 = "0.12"
 hmac = "0.12"
 sha2 = "0.10"
 
@@ -27,14 +27,14 @@ zip = "8.1.0"
 # 用户界面
 dialoguer = "0.12.0"
 console = "0.16.2"
-native-dialog = "0.7.0"             # 系统文件对话框
+native-dialog = "0.7.0"
 
 # 配置
-simple-home-dir = "0.5.2"           # 获取用户目录
-
-# 工具
-chrono = "0.4"                    # 时间处理
+simple-home-dir = "0.5.2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+# 工具
+chrono = "0.4"
 anyhow = "1.0"
 thiserror = "2.0.18"
